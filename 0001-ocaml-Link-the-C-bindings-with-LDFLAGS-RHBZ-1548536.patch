@@ -1,0 +1,48 @@
+From be51757920b56a77e2e63247f9a8409ce994d33c Mon Sep 17 00:00:00 2001
+From: "Richard W.M. Jones" <rjones@redhat.com>
+Date: Mon, 26 Feb 2018 12:38:12 +0000
+Subject: [PATCH] ocaml: Link the C bindings with LDFLAGS (RHBZ#1548536).
+
+Use the ocamlmklib -ldopt flag to pass the general $(LDFLAGS) when
+calling gcc to link dllmlhivex.so.  We were already passing $(CFLAGS)
+when building the object file.
+
+When building using Fedora's standard hardening flags this gives:
+
+ocamlmklib -o mlhivex hivex_c.o hivex.cmo \
+    -verbose -ldopt '-Wl,-z,relro -specs=/usr/lib/rpm/redhat/redhat-hardened-ld' \
+    -L../lib/.libs -lhivex
++ gcc -shared  -o ./dllmlhivex.so hivex_c.o  -Wl,-z,relro -specs=/usr/lib/rpm/redhat/redhat-hardened-ld  -L../lib/.libs -lhivex
++ ar rc ./libmlhivex.a  hivex_c.o; ranlib ./libmlhivex.a
++ /usr/bin/ocamlc -a    -o mlhivex.cma  hivex.cmo -dllib -lmlhivex -cclib -lmlhivex   -cclib -L../lib/.libs -cclib -lhivex
+
+This also works if $(LDFLAGS) is empty, because ocamlmklib ignores
+-ldopt ''.
+---
+ ocaml/Makefile.am | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/ocaml/Makefile.am b/ocaml/Makefile.am
+index 61db095..85655b6 100644
+--- a/ocaml/Makefile.am
++++ b/ocaml/Makefile.am
+@@ -41,10 +41,14 @@ OBJS = hivex_c.o hivex.cmo
+ XOBJS = $(OBJS:.cmo=.cmx)
+ 
+ mlhivex.cma: $(OBJS)
+-	$(OCAMLMKLIB) -o mlhivex $^ -L$(top_builddir)/lib/.libs -lhivex
++	$(OCAMLMKLIB) -o mlhivex $^ \
++	    -ldopt '$(LDFLAGS)' \
++	    -L$(top_builddir)/lib/.libs -lhivex
+ 
+ mlhivex.cmxa: $(XOBJS)
+-	$(OCAMLMKLIB) -o mlhivex $^ -L$(top_builddir)/lib/.libs -lhivex
++	$(OCAMLMKLIB) -o mlhivex $^ \
++	    -ldopt '$(LDFLAGS)' \
++	    -L$(top_builddir)/lib/.libs -lhivex
+ 
+ hivex_c.o: hivex_c.c
+ 	$(CC) $(AM_CPPFLAGS) $(CFLAGS) -fPIC -Wall -c $<
+-- 
+2.13.2
+
