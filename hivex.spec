@@ -1,108 +1,48 @@
-# Conditionalize Ocaml support.  This looks ass-backwards, but it's not.
 %ifarch %{ocaml_native_compiler}
 %bcond_without ocaml
 %else
 %bcond_with ocaml
 %endif
 
-# Verify tarball signature with GPGv2.
-%global verify_tarball_signature 1
-
 Name:           hivex
 Version:        1.3.15
-Release:        1
-Summary:        Read and write Windows Registry binary hive files
-
+Release:        12
+Summary:        Windows Registry "hive" extraction library
 License:        LGPLv2
 URL:            http://libguestfs.org/
 
-Source0:        %{name}-%{version}.tar.gz
-%if 0%{verify_tarball_signature}
-Source1:        %{name}-%{version}.tar.gz.sig
-%endif
+Source0:        http://libguestfs.org/download/hivex/%{name}-%{version}.tar.gz
+Source1:        http://libguestfs.org/download/hivex/%{name}-%{version}.tar.gz.sig
+Source2:        libguestfs.keyring
 
-# Keyring used to verify tarball signature.
-%if 0%{verify_tarball_signature}
-Source2:       libguestfs.keyring
-%endif
-
-# Upstream patch to fix injection of LDFLAGS.
-# https://bugzilla.redhat.com/show_bug.cgi?id=1548536
 Patch1:         0001-ocaml-Link-the-C-bindings-with-LDFLAGS-RHBZ-1548536.patch
-BuildRequires:  autoconf, automake, libtool, gettext-devel
 
-BuildRequires:  perl-interpreter
-BuildRequires:  perl-devel
-BuildRequires:  perl-generators
-BuildRequires:  %{_bindir}/pod2html
-BuildRequires:  %{_bindir}/pod2man
-BuildRequires:  perl(bytes)
-BuildRequires:  perl(Carp)
-BuildRequires:  perl(Encode)
-BuildRequires:  perl(ExtUtils::MakeMaker)
-BuildRequires:  perl(Exporter)
-BuildRequires:  perl(IO::Scalar)
-BuildRequires:  perl(IO::Stringy)
-BuildRequires:  perl(strict)
-BuildRequires:  perl(Test::More)
-BuildRequires:  perl(utf8)
-BuildRequires:  perl(vars)
-BuildRequires:  perl(warnings)
-BuildRequires:  perl(XSLoader)
-BuildRequires:  perl(Test::Pod) >= 1.00
-BuildRequires:  perl(Test::Pod::Coverage) >= 1.00
+BuildRequires:  autoconf, automake, libtool, gettext-devel, perl-interpreter, perl-devel, perl-generators, %{_bindir}/pod2html, %{_bindir}/pod2man
+BuildRequires:  perl(bytes), perl(Carp), perl(Encode), perl(ExtUtils::MakeMaker), perl(Exporter), perl(IO::Scalar), perl(IO::Stringy), perl(strict), perl(Test::More), perl(utf8), perl(vars), perl(warnings), perl(XSLoader), perl(Test::Pod) >= 1.00, perl(Test::Pod::Coverage) >= 1.00
+
 %if %{with ocaml}
 BuildRequires:  ocaml
 BuildRequires:  ocaml-findlib-devel
 %endif
-BuildRequires:  python2-devel, python-unversioned-command
-BuildRequires:  python3-devel
-BuildRequires:  ruby-devel
-BuildRequires:  rubygem-rake
-BuildRequires:  rubygem(json)
-BuildRequires:  rubygem(minitest)
-BuildRequires:  rubygem(rdoc)
-BuildRequires:  readline-devel
-BuildRequires:  libxml2-devel
-%if 0%{verify_tarball_signature}
-BuildRequires: gnupg2
-%endif
+
+BuildRequires:  python2-devel, python-unversioned-command, python3-devel, ruby-devel, rubygem-rake, rubygem(json), rubygem(minitest), rubygem(rdoc), readline-devel, libxml2-devel, gnupg2
 
 Provides:      bundled(gnulib)
 
-
 %description
-Hive files are the undocumented binary files that Windows uses to
-store the Windows Registry on disk.  Hivex is a library that can read
-and write to these files.
+Hivex is a library for extracting the contents of Windows Registry "hive" files.  It is designed to be secure against buggy or
+malicious registry files.
 
-'hivexsh' is a shell you can use to interactively navigate a hive
-binary file.
+Unlike other tools in this area, it doesn't use the textual .REG format, because parsing that is as much trouble as parsing the
+original binary format.  Instead it makes the file available through a C API, and then wraps this API in higher level scripting and GUI
+tools.
 
-'hivexregedit' (in perl-hivex) lets you export and merge to the
-textual regedit format.
+There is a separate program to export the hive as XML (see hivexml(1)), or to navigate the file (see hivexsh(1)).  There is also a Perl
+script to export and merge the file as a textual .REG (regedit) file, see hivexregedit(1).
 
-'hivexml' can be used to convert a hive file to a more useful XML
-format.
+If you just want to export or modify the Registry of a Windows virtual machine, you should look at virt-win-reg(1).
 
-In order to get access to the hive files themselves, you can copy them
-from a Windows machine.  They are usually found in
-%%systemroot%%\system32\config.  For virtual machines we recommend
-using libguestfs or guestfish to copy out these files.  libguestfs
-also provides a useful high-level tool called 'virt-win-reg' (based on
-hivex technology) which can be used to query specific registry keys in
-an existing Windows VM.
-
-For OCaml bindings, see 'ocaml-hivex-devel'.
-
-For Perl bindings, see 'perl-hivex'.
-
-For Python 2 bindings, see 'python2-hivex'.
-
-For Python 3 bindings, see 'python3-hivex'.
-
-For Ruby bindings, see 'ruby-hivex'.
-
+Hivex is also comes with language bindings for OCaml, Perl, Python and Ruby.
 
 %package devel
 Summary:        Development tools and libraries for %{name}
@@ -115,14 +55,7 @@ Requires:       pkgconfig
 for %{name}.
 
 
-%package static
-Summary:        Statically linked library for %{name}
-Requires:       %{name} = %{version}-%{release}
-
-
-%description static
-%{name}-static contains the statically linked library
-for %{name}.
+%package_help
 
 
 %if %{with ocaml}
@@ -164,7 +97,6 @@ perl-%{name} contains Perl bindings for %{name}.
 Summary:       Python 2 bindings for %{name}
 Requires:      %{name} = %{version}-%{release}
 
-# Can be removed in Fedora 29.
 Obsoletes:     python-%{name} < %{version}-%{release}
 Provides:      python-%{name} = %{version}-%{release}
 
@@ -192,22 +124,15 @@ ruby-%{name} contains Ruby bindings for %{name}.
 
 
 %prep
-%if 0%{verify_tarball_signature}
 tmphome="$(mktemp -d)"
 gpgv2 --homedir "$tmphome" --keyring %{SOURCE2} %{SOURCE1} %{SOURCE0}
-%endif
-%setup -q
-%autopatch -p1
+%autosetup -p1 -n %{name}-%{version}
 
-# Because the patch touches Makefile.am, rerun autotools.
 autoreconf -i -f
 
-# Build Python 3 bindings in a separate subdirectory.  We have to
-# build everything twice unfortunately.
 copy="$(mktemp -d)"
 cp -a . "$copy"
 mv "$copy" python3
-
 
 %build
 %configure \
@@ -226,8 +151,6 @@ popd
 
 
 %install
-# Install Python3 first so the "real" install below overwrites
-# everything else.
 pushd python3
 make install DESTDIR=$RPM_BUILD_ROOT INSTALLDIRS=vendor
 popd
@@ -255,30 +178,21 @@ pushd python3
 make check
 popd
 
-
-%files -f %{name}.lang
-%doc README LICENSE
-%{_bindir}/hivexget
-%{_bindir}/hivexml
-%{_bindir}/hivexsh
-%{_libdir}/libhivex.so.*
-%{_mandir}/man1/hivexget.1*
-%{_mandir}/man1/hivexml.1*
-%{_mandir}/man1/hivexsh.1*
-
-
 %files devel
 %doc LICENSE
 %{_libdir}/libhivex.so
-%{_mandir}/man3/hivex.3*
 %{_includedir}/hivex.h
 %{_libdir}/pkgconfig/hivex.pc
-
-
-%files static
-%doc LICENSE
 %{_libdir}/libhivex.a
 
+%files help
+%{_mandir}/man1/hivexget.1*
+%{_mandir}/man1/hivexml.1*
+%{_mandir}/man1/hivexsh.1*
+%{_mandir}/man3/hivex.3*
+%{_mandir}/man3/Win::Hivex.3pm*
+%{_mandir}/man3/Win::Hivex::Regedit.3pm*
+%{_mandir}/man1/hivexregedit.1*
 
 %if %{with ocaml}
 %files -n ocaml-%{name}
@@ -302,10 +216,7 @@ popd
 
 %files -n perl-%{name}
 %{perl_vendorarch}/*
-%{_mandir}/man3/Win::Hivex.3pm*
-%{_mandir}/man3/Win::Hivex::Regedit.3pm*
 %{_bindir}/hivexregedit
-%{_mandir}/man1/hivexregedit.1*
 
 
 %files -n python2-%{name}
@@ -323,7 +234,13 @@ popd
 %{ruby_vendorlibdir}/hivex.rb
 %{ruby_vendorarchdir}/_hivex.so
 
+%files -f %{name}.lang
+%doc README LICENSE
+%{_bindir}/hivexget
+%{_bindir}/hivexml
+%{_bindir}/hivexsh
+%{_libdir}/libhivex.so.*
 
 %changelog
-* Sat Nov 30 2019 openEuler Buildteam <buildteam@openeuler.org> - 1.3.15-1
+* Sat Nov 30 2019 jiaxiya <jiaxiyajiaxiya@163.com> - 1.3.15-12
 - Package init
