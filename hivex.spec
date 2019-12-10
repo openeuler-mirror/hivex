@@ -5,8 +5,8 @@
 %endif
 
 Name:           hivex
-Version:        1.3.15
-Release:        12
+Version:        1.3.17
+Release:        2
 Summary:        Windows Registry "hive" extraction library
 License:        LGPLv2
 URL:            http://libguestfs.org/
@@ -14,8 +14,6 @@ URL:            http://libguestfs.org/
 Source0:        http://libguestfs.org/download/hivex/%{name}-%{version}.tar.gz
 Source1:        http://libguestfs.org/download/hivex/%{name}-%{version}.tar.gz.sig
 Source2:        libguestfs.keyring
-
-Patch1:         0001-ocaml-Link-the-C-bindings-with-LDFLAGS-RHBZ-1548536.patch
 
 BuildRequires:  autoconf, automake, libtool, gettext-devel, perl-interpreter, perl-devel, perl-generators, %{_bindir}/pod2html, %{_bindir}/pod2man
 BuildRequires:  perl(bytes), perl(Carp), perl(Encode), perl(ExtUtils::MakeMaker), perl(Exporter), perl(IO::Scalar), perl(IO::Stringy), perl(strict), perl(Test::More), perl(utf8), perl(vars), perl(warnings), perl(XSLoader), perl(Test::Pod) >= 1.00, perl(Test::Pod::Coverage) >= 1.00
@@ -242,5 +240,5 @@ popd
 %{_libdir}/libhivex.so.*
 
 %changelog
-* Sat Nov 30 2019 jiaxiya <jiaxiyajiaxiya@163.com> - 1.3.15-12
+* Sat Nov 30 2019 jiaxiya <jiaxiyajiaxiya@163.com> - 1.3.17-2
 - Package init
