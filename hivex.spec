@@ -48,8 +48,8 @@ Summary:        Development package for %{name}
 Requires:       %{name} = %{version}-%{release}
 Requires:       pkgconfig
 
-Provides:       %{name}-devel
-Obsoletes:      %{name}-devel
+Provides:       %{name}-static = %{version}-%{release}
+Obsoletes:      %{name}-static < %{version}-%{release}
 
 %description devel
 Development tools and libraries for %{name} are included in %{name}-devel.
@@ -167,15 +167,11 @@ cd python3 && make check && cd ..
 %exclude %{_libdir}/perl5/perllocal.pod
 %exclude %{python2_sitearch}/libhivexmod.la
 %exclude %{python3_sitearch}/libhivexmod.la
-%{_mandir}/man1/hivexget.1*
-%{_mandir}/man1/hivexml.1*
-%{_mandir}/man1/hivexsh.1*
 
 
 %files devel
 %doc LICENSE
 %{_libdir}/libhivex.so
-%{_mandir}/man3/hivex.3*
 %{_includedir}/hivex.h
 %{_libdir}/pkgconfig/hivex.pc
 %{_libdir}/libhivex.a
