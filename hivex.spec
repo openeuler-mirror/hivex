@@ -5,8 +5,8 @@
 %endif
 
 Name:           hivex
-Version:        1.3.15
-Release:        12
+Version:        1.3.17
+Release:        2
 Summary:        Windows Registry "hive" extraction library
 License:        LGPLv2
 URL:            http://libguestfs.org/
@@ -15,10 +15,7 @@ Source0:        http://libguestfs.org/download/hivex/%{name}-%{version}.tar.gz
 Source1:        http://libguestfs.org/download/hivex/%{name}-%{version}.tar.gz.sig
 Source2:        libguestfs.keyring
 
-Patch1:         0001-ocaml-Link-the-C-bindings-with-LDFLAGS-RHBZ-1548536.patch
-
-BuildRequires:  autoconf, automake, libtool, gettext-devel, perl-interpreter, perl-devel, perl-generators, perl, perl-podlators
-BuildRequires:  perl(bytes), perl(Carp), perl(Encode), perl(ExtUtils::MakeMaker), perl(Exporter), perl(IO::Scalar), perl(IO::Stringy), perl(strict), perl(Test::More), perl(utf8), perl(vars), perl(warnings), perl(XSLoader), perl(Test::Pod) >= 1.00, perl(Test::Pod::Coverage) >= 1.00
+BuildRequires:  perl-interpreter, perl, perl-podlators, perl-devel, perl-generators, perl(bytes), perl(Carp), perl(Encode), perl(ExtUtils::MakeMaker), perl(Exporter), perl(IO::Scalar), perl(IO::Stringy), perl(strict), perl(Test::More), perl(utf8), perl(vars), perl(warnings), perl(XSLoader), perl(Test::Pod) >= 1.00, perl(Test::Pod::Coverage) >= 1.00
 
 %if %{with ocaml}
 BuildRequires:  ocaml
@@ -28,6 +25,7 @@ BuildRequires:  ocaml-findlib-devel
 BuildRequires:  python2-devel, python-unversioned-command, python3-devel, ruby-devel, rubygem-rake, rubygem(json), rubygem(minitest), rubygem(rdoc), readline-devel, libxml2-devel, gnupg2
 
 Provides:      bundled(gnulib)
+
 
 %description
 Hivex is a library for extracting the contents of Windows Registry "hive" files.  It is designed to be secure against buggy or
@@ -44,6 +42,7 @@ If you just want to export or modify the Registry of a Windows virtual machine, 
 
 Hivex is also comes with language bindings for OCaml, Perl, Python and Ruby.
 
+
 %package devel
 Summary:        Development package for %{name}
 Requires:       %{name} = %{version}-%{release}
@@ -51,7 +50,6 @@ Requires:       pkgconfig
 
 Provides:       %{name}-devel
 Obsoletes:      %{name}-devel
-
 
 %description devel
 Development tools and libraries for %{name} are included in %{name}-devel.
@@ -65,19 +63,17 @@ Development tools and libraries for %{name} are included in %{name}-devel.
 Summary:       Provide OCaml bindings for %{name}
 Requires:      %{name} = %{version}-%{release}
 
-
 %description -n ocaml-%{name}
 OCaml bindings for %{name} are included in ocaml-%{name}.
 
-This is for toplevel and scripting access only.  To compile OCaml
-programs which use %{name} you will also need ocaml-%{name}-devel.
+Only for toplevel and scripting access. To compile OCaml
+programs which use %{name} you will also need ocaml-%{name}-devel package.
 
 
 %package -n ocaml-%{name}-devel
 Summary:       Development package for %{name} OCaml bindings
 Requires:      ocaml-%{name} = %{version}-%{release}
 Requires:      %{name}-devel = %{version}-%{release}
-
 
 %description -n ocaml-%{name}-devel
 Development libraries required to use the OCaml bindings for %{name} are in ocaml-%{name}-devel.
@@ -88,7 +84,6 @@ Development libraries required to use the OCaml bindings for %{name} are in ocam
 Summary:       Provide perl bindings for %{name}
 Requires:      %{name} = %{version}-%{release}
 Requires:      perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
-
 
 %description -n perl-%{name}
 Perl bindings for %{name} are included in perl-%{name}.
@@ -128,9 +123,8 @@ Ruby bindings for %{name} are included ruby-%{name}.
 tmphome="$(mktemp -d)" && gpgv2 --homedir "$tmphome" --keyring %{SOURCE2} %{SOURCE1} %{SOURCE0}
 %autosetup -p1 -n %{name}-%{version}
 
-autoreconf -i -f
-
 copy="$(mktemp -d)" && cp -a . "$copy" && mv "$copy" python3
+
 
 %build
 %configure \
@@ -147,22 +141,12 @@ cd python3
 %make_build V=1 INSTALLDIRS=vendor
 cd ..
 
+
 %install
 cd python3
 %make_install DESTDIR=$RPM_BUILD_ROOT INSTALLDIRS=vendor
 cd ..
 %make_install DESTDIR=$RPM_BUILD_ROOT INSTALLDIRS=vendor
-
-#rm $RPM_BUILD_ROOT%{_libdir}/libhivex.la
-
-# Remove unwanted Perl files:
-# find $RPM_BUILD_ROOT -name perllocal.pod -delete
-# find $RPM_BUILD_ROOT -name .packlist -delete
-# find $RPM_BUILD_ROOT -name '*.bs' -delete
-
-# Remove unwanted Python files:
-# rm $RPM_BUILD_ROOT%{python2_sitearch}/libhivexmod.la
-# rm $RPM_BUILD_ROOT%{python3_sitearch}/libhivexmod.la
 
 %find_lang %{name}
 
@@ -170,9 +154,7 @@ cd ..
 %check
 make check
 
-cd python3
-make check
-cd ..
+cd python3 && make check && cd ..
 
 
 %files -f %{name}.lang
@@ -185,11 +167,15 @@ cd ..
 %exclude %{_libdir}/perl5/perllocal.pod
 %exclude %{python2_sitearch}/libhivexmod.la
 %exclude %{python3_sitearch}/libhivexmod.la
+%{_mandir}/man1/hivexget.1*
+%{_mandir}/man1/hivexml.1*
+%{_mandir}/man1/hivexsh.1*
 
 
 %files devel
 %doc LICENSE
 %{_libdir}/libhivex.so
+%{_mandir}/man3/hivex.3*
 %{_includedir}/hivex.h
 %{_libdir}/pkgconfig/hivex.pc
 %{_libdir}/libhivex.a
@@ -247,5 +233,5 @@ cd ..
 
 
 %changelog
-* Sat Nov 30 2019 jiaxiya <jiaxiyajiaxiya@163.com> - 1.3.15-12
+* Sat Nov 30 2019 jiaxiya <jiaxiyajiaxiya@163.com> - 1.3.17-2
 - Package init
