@@ -144,9 +144,9 @@ cd ..
 
 %install
 cd python3
-%make_install DESTDIR=$RPM_BUILD_ROOT INSTALLDIRS=vendor
+%make_install INSTALLDIRS=vendor
 cd ..
-%make_install DESTDIR=$RPM_BUILD_ROOT INSTALLDIRS=vendor
+%make_install INSTALLDIRS=vendor
 
 %find_lang %{name}
 
