@@ -6,11 +6,10 @@
 
 Name:           hivex
 Version:        1.3.17
-Release:        2
+Release:        3
 Summary:        Windows Registry "hive" extraction library
 License:        LGPLv2
 URL:            http://libguestfs.org/
-
 Source0:        http://libguestfs.org/download/hivex/%{name}-%{version}.tar.gz
 Source1:        http://libguestfs.org/download/hivex/%{name}-%{version}.tar.gz.sig
 Source2:        libguestfs.keyring
@@ -22,7 +21,7 @@ BuildRequires:  ocaml
 BuildRequires:  ocaml-findlib-devel
 %endif
 
-BuildRequires:  python2-devel, python-unversioned-command, python3-devel, ruby-devel, rubygem-rake, rubygem(json), rubygem(minitest), rubygem(rdoc), readline-devel, libxml2-devel, gnupg2
+BuildRequires:  python3-devel, ruby-devel, rubygem-rake, rubygem(json), rubygem(minitest), rubygem(rdoc), readline-devel, libxml2-devel, gnupg2
 
 Provides:      bundled(gnulib)
 
@@ -87,18 +86,6 @@ Requires:      perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $versio
 
 %description -n perl-%{name}
 Perl bindings for %{name} are included in perl-%{name}.
-
-
-%package -n python2-%{name}
-Summary:       Provide python 2 bindings for %{name}
-Requires:      %{name} = %{version}-%{release}
-
-Obsoletes:     python-%{name} < %{version}-%{release}
-Provides:      python-%{name} = %{version}-%{release}
-
-%description -n python2-%{name}
-Python 2 bindings for %{name} are included in python2-%{name}.
-
 
 %package -n python3-%{name}
 Summary:       Provide python 3 bindings for %{name}
@@ -165,7 +152,6 @@ cd python3 && make check && cd ..
 %{_libdir}/libhivex.so.*
 %exclude %{_libdir}/libhivex.la
 %exclude %{_libdir}/perl5/perllocal.pod
-%exclude %{python2_sitearch}/libhivexmod.la
 %exclude %{python3_sitearch}/libhivexmod.la
 
 
@@ -211,12 +197,6 @@ cd python3 && make check && cd ..
 %{perl_vendorarch}/*
 %{_bindir}/hivexregedit
 
-
-%files -n python2-%{name}
-%{python2_sitearch}/hivex/
-%{python2_sitearch}/*.so
-
-
 %files -n python3-%{name}
 %{python3_sitearch}/hivex/
 %{python3_sitearch}/*.so
@@ -229,5 +209,8 @@ cd python3 && make check && cd ..
 
 
 %changelog
+* Wed Oct 21 2020 leiju <leiju4@163.com> - 1.3.17-3
+- remove python2 subpackage
+
 * Sat Nov 30 2019 jiaxiya <jiaxiyajiaxiya@163.com> - 1.3.17-2
 - Package init
