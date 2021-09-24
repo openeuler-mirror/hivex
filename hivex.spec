@@ -6,7 +6,7 @@
 
 Name:           hivex
 Version:        1.3.17
-Release:        4
+Release:        5
 Summary:        Windows Registry "hive" extraction library
 License:        LGPLv2
 URL:            http://libguestfs.org/
@@ -14,6 +14,7 @@ Source0:        http://libguestfs.org/download/hivex/%{name}-%{version}.tar.gz
 Source1:        http://libguestfs.org/download/hivex/%{name}-%{version}.tar.gz.sig
 Source2:        libguestfs.keyring
 Patch0:         CVE-2021-3504.patch
+Patch1:         CVE-2021-3622.patch
 
 BuildRequires:  perl-interpreter, perl, perl-podlators, perl-devel, perl-generators, perl(bytes), perl(Carp), perl(Encode), perl(ExtUtils::MakeMaker), perl(Exporter), perl(IO::Scalar), perl(IO::Stringy), perl(strict), perl(Test::More), perl(utf8), perl(vars), perl(warnings), perl(XSLoader), perl(Test::Pod) >= 1.00, perl(Test::Pod::Coverage) >= 1.00
 
@@ -210,6 +211,9 @@ cd python3 && make check && cd ..
 
 
 %changelog
+* Fri Sep 24 2021 yaoxin <yaoxin30@huawei.com> - 1.3.17-5
+- Fix CVE-2021-3622
+
 * Tue May 25 2021 wangyue <wangyue92@huawei.com> - 1.3.17-4
 - Fix CVE-2021-3504
 
