@@ -5,47 +5,78 @@
 %endif
 
 Name:           hivex
-Version:        1.3.17
-Release:        5
-Summary:        Windows Registry "hive" extraction library
+Version:        1.3.21
+Release:        1
+Summary:        Read and write Windows Registry binary hive files
 License:        LGPLv2
 URL:            http://libguestfs.org/
 Source0:        http://libguestfs.org/download/hivex/%{name}-%{version}.tar.gz
 Source1:        http://libguestfs.org/download/hivex/%{name}-%{version}.tar.gz.sig
 Source2:        libguestfs.keyring
-Patch0:         CVE-2021-3504.patch
-Patch1:         CVE-2021-3622.patch
 
-BuildRequires:  perl-interpreter, perl, perl-podlators, perl-devel, perl-generators, perl(bytes), perl(Carp), perl(Encode), perl(ExtUtils::MakeMaker), perl(Exporter), perl(IO::Scalar), perl(IO::Stringy), perl(strict), perl(Test::More), perl(utf8), perl(vars), perl(warnings), perl(XSLoader), perl(Test::Pod) >= 1.00, perl(Test::Pod::Coverage) >= 1.00
-
+BuildRequires:  perl-interpreter
+BuildRequires:  perl-devel
+BuildRequires:  perl-generators
+BuildRequires:  %{_bindir}/pod2html
+BuildRequires:  %{_bindir}/pod2man
+BuildRequires:  perl(bytes)
+BuildRequires:  perl(Carp)
+BuildRequires:  perl(Encode)
+BuildRequires:  perl(ExtUtils::MakeMaker)
+BuildRequires:  perl(Exporter)
+BuildRequires:  perl(IO::Scalar)
+BuildRequires:  perl(IO::Stringy)
+BuildRequires:  perl(strict)
+BuildRequires:  perl(Test::More)
+BuildRequires:  perl(utf8)
+BuildRequires:  perl(vars)
+BuildRequires:  perl(warnings)
+BuildRequires:  perl(XSLoader)
+BuildRequires:  perl(Test::Pod) >= 1.00
+BuildRequires:  perl(Test::Pod::Coverage) >= 1.00
 %if %{with ocaml}
 BuildRequires:  ocaml
 BuildRequires:  ocaml-findlib-devel
 %endif
+BuildRequires:  python3-devel
+BuildRequires:  ruby-devel
+BuildRequires:  rubygem-rake
+BuildRequires:  rubygem(json)
+BuildRequires:  rubygem(minitest)
+BuildRequires:  rubygem(rdoc)
+BuildRequires:  readline-devel
+BuildRequires:  libxml2-devel
+BuildRequires:  gnupg2
+BuildRequires:  make
 
-BuildRequires:  python3-devel, ruby-devel, rubygem-rake, rubygem(json), rubygem(minitest), rubygem(rdoc), readline-devel, libxml2-devel, gnupg2
-
-Provides:      bundled(gnulib)
-
+Provides:       bundled(gnulib)
 
 %description
-Hivex is a library for extracting the contents of Windows Registry "hive" files.  It is designed to be secure against buggy or
-malicious registry files.
+Hive files are the undocumented binary files that Windows uses to store the Windows Registry on disk.  
+Hivex is a library that can read and write to these files.
 
-Unlike other tools in this area, it doesn't use the textual .REG format, because parsing that is as much trouble as parsing the
-original binary format.  Instead it makes the file available through a C API, and then wraps this API in higher level scripting and GUI
-tools.
+'hivexsh' is a shell you can use to interactively navigate a hive binary file.
 
-There is a separate program to export the hive as XML (see hivexml(1)), or to navigate the file (see hivexsh(1)).  There is also a Perl
-script to export and merge the file as a textual .REG (regedit) file, see hivexregedit(1).
+'hivexregedit' (in perl-hivex) lets you export and merge to the textual regedit format.
 
-If you just want to export or modify the Registry of a Windows virtual machine, you should look at virt-win-reg(1).
+'hivexml' can be used to convert a hive file to a more useful XML format.
 
-Hivex is also comes with language bindings for OCaml, Perl, Python and Ruby.
+In order to get access to the hive files themselves, you can copy them from a Windows machine.  They are 
+usually found in %%systemroot%%\system32\config.  For virtual machines we recommend using libguestfs or 
+guestfish to copy out these files.  libguestfs also provides a useful high-level tool called 'virt-win-reg'
+ (based on hivex technology) which can be used to query specific registry keys in an existing Windows VM.
+
+For OCaml bindings, see 'ocaml-hivex-devel'.
+
+For Perl bindings, see 'perl-hivex'.
+
+For Python 3 bindings, see 'python3-hivex'.
+
+For Ruby bindings, see 'ruby-hivex'.
 
 
 %package devel
-Summary:        Development package for %{name}
+Summary:        Development tools and libraries for %{name}
 Requires:       %{name} = %{version}-%{release}
 Requires:       pkgconfig
 
@@ -53,7 +84,7 @@ Provides:       %{name}-static = %{version}-%{release}
 Obsoletes:      %{name}-static < %{version}-%{release}
 
 %description devel
-Development tools and libraries for %{name} are included in %{name}-devel.
+%{name}-devel contains development tools and libraries for %{name}.
 
 
 %package_help
@@ -61,80 +92,74 @@ Development tools and libraries for %{name} are included in %{name}-devel.
 
 %if %{with ocaml}
 %package -n ocaml-%{name}
-Summary:       Provide OCaml bindings for %{name}
+Summary:       OCaml bindings for %{name}
 Requires:      %{name} = %{version}-%{release}
 
-%description -n ocaml-%{name}
-OCaml bindings for %{name} are included in ocaml-%{name}.
 
-Only for toplevel and scripting access. To compile OCaml
-programs which use %{name} you will also need ocaml-%{name}-devel package.
+%description -n ocaml-%{name}
+ocaml-%{name} contains OCaml bindings for %{name}.
+
+This is for toplevel and scripting access only.  To compile OCaml
+programs which use %{name} you will also need ocaml-%{name}-devel.
 
 
 %package -n ocaml-%{name}-devel
-Summary:       Development package for %{name} OCaml bindings
+Summary:       OCaml bindings for %{name}
 Requires:      ocaml-%{name} = %{version}-%{release}
 Requires:      %{name}-devel = %{version}-%{release}
 
+
 %description -n ocaml-%{name}-devel
-Development libraries required to use the OCaml bindings for %{name} are in ocaml-%{name}-devel.
+ocaml-%{name}-devel contains development libraries
+required to use the OCaml bindings for %{name}.
 %endif
 
 
 %package -n perl-%{name}
-Summary:       Provide perl bindings for %{name}
+Summary:       Perl bindings for %{name}
 Requires:      %{name} = %{version}-%{release}
 Requires:      perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 
+
 %description -n perl-%{name}
-Perl bindings for %{name} are included in perl-%{name}.
+perl-%{name} contains Perl bindings for %{name}.
+
 
 %package -n python3-%{name}
-Summary:       Provide python 3 bindings for %{name}
+Summary:       Python 3 bindings for %{name}
 Requires:      %{name} = %{version}-%{release}
 
 %description -n python3-%{name}
-Python 3 bindings for %{name} are included in python3-%{name}.
+python3-%{name} contains Python 3 bindings for %{name}.
 
 
 %package -n ruby-%{name}
-Summary:       Provide ruby bindings for %{name}
+Summary:       Ruby bindings for %{name}
 Requires:      %{name} = %{version}-%{release}
 Requires:      ruby(release)
 Requires:      ruby
 Provides:      ruby(hivex) = %{version}
 
 %description -n ruby-%{name}
-Ruby bindings for %{name} are included ruby-%{name}.
+ruby-%{name} contains Ruby bindings for %{name}.
 
 
 %prep
 tmphome="$(mktemp -d)" && gpgv2 --homedir "$tmphome" --keyring %{SOURCE2} %{SOURCE1} %{SOURCE0}
-%autosetup -p1 -n %{name}-%{version}
-
-copy="$(mktemp -d)" && cp -a . "$copy" && mv "$copy" python3
+%autosetup -n %{name}-%{version}
 
 
 %build
 %configure \
+    PYTHON=%{__python3} \
 %if !%{with ocaml}
     --disable-ocaml \
 %endif
     %{nil}
 %make_build V=1 INSTALLDIRS=vendor
 
-cd python3
-%configure \
-    PYTHON=/usr/bin/python3 \
-    --disable-ocaml --disable-perl --disable-ruby
-%make_build V=1 INSTALLDIRS=vendor
-cd ..
-
 
 %install
-cd python3
-%make_install INSTALLDIRS=vendor
-cd ..
 %make_install INSTALLDIRS=vendor
 
 %find_lang %{name}
@@ -142,8 +167,6 @@ cd ..
 
 %check
 make check
-
-cd python3 && make check && cd ..
 
 
 %files -f %{name}.lang
@@ -211,6 +234,9 @@ cd python3 && make check && cd ..
 
 
 %changelog
+* Wed Oct 12 2022 hantingxiang <hantingxiang@gmail.com> - 1.3.21-1
+- update version to 1.3.21
+
 * Fri Sep 24 2021 yaoxin <yaoxin30@huawei.com> - 1.3.17-5
 - Fix CVE-2021-3622
 
